@@ -10,7 +10,7 @@
 
 # One issue with this network is that weigt and bias initialization is random.
 # If the parameters initialize to relatively large values the sigmoid will saturate
-# and the gradient won't change
+# and the gradient won't change. Normalizing the data helped with this a lot.
 
 # import libs
 import numpy as np
@@ -55,11 +55,11 @@ def predict(x, y):
 # 2D dataset to classify
 # 100 points split into two clusters (centers) with 2 features (x,y coordinate) inside center_box
 # input is the list of points, output is the list of labels for each point
-sample_size = 1000
-data_input, output = make_blobs(n_samples=sample_size, centers=2, n_features=2, center_box=(0,100), cluster_std=2.5)
+sample_size = 100
+#data_input, output = make_blobs(n_samples=sample_size, centers=2, n_features=2, center_box=(0,100), cluster_std=2.5)
 
 # more difficult data is moons or circles
-#data_input, output = make_moons(n_samples=sample_size, noise=0.1)
+data_input, output = make_moons(n_samples=sample_size, noise=0.1)
 #data_input, output = make_circles(n_samples=sample_size, noise=0.06, factor=0.1)
 
 # create a table from these inputs and outputs
@@ -80,21 +80,23 @@ plt.show(block=False)
 
 # ============== neural network initialization ===================
 
-# transpose the input into column vectors
+# transpose the input into column vectors, normalize data to avoid saturation
 data_input = data_input.transpose()
+data_input = data_input /2 # /100 for cluster, /2 for moons, /1 for circles
 
 # transpose the output to a column vector
 output = output.reshape(sample_size,1)
 
+
 # randomize the weight matrix and bias vector
 np.random.seed(int(time.time())%1000)
-W = np.random.randn(1,2)/1000
-B = np.random.randn(1)/1000
-learning_rate = 0.04
+W = np.random.randn(1,2)
+B = np.random.randn(1)
+learning_rate = 0.1
 
 
 # ============== Train the Network ================
-for epoch in range(20000):
+for epoch in range(1000):
     # set the data_input
     X = data_input
 
@@ -110,7 +112,7 @@ for epoch in range(20000):
     # ============= Backward Propagation ===============
     # Back prop through the output layer
     loss = 0.5*(a.transpose()-output)**2
-    print("loss: ", loss.sum())
+    print("loss: ", loss.sum()/sample_size)
 
     # derivative of cost with respect to output activations
     dc_da = loss_derivative(a.transpose(),output)
