@@ -195,7 +195,8 @@ class Network:
                 
             # if have test data, then evaluate the network at each epoch    
             if test_data:
-                print("Epoch {0}: {1} / {2}".format(j, self.test_network(test_data), n_test))
+                print("Epoch {0}: Train_data: {1} / {2}".format(j, self.test_network(training_data), len(training_data)))
+                print("Epoch {0}: Test_data: {1} / {2}".format(j, self.test_network(test_data), n_test))
             else:
                 print("Epoch {0} complete".format(j))
 
@@ -206,26 +207,6 @@ class Network:
         return sum(int(output[max_index] == 1) for (max_index, output) in test_results)
 
 if __name__ == "__main__":
-    # net = Network([2,1])
-    # print(net.layers)
-    # print("input layer",net.layers[0])
-
-    # print("weights",net.layers[1][0].W)
-    # print("biases",net.layers[1][0].B)
-
-    # data = np.array([[1,1]]).transpose()
-    # net.forward_pass(data)
-
-    # output_labels = np.array([2])
-    # net.backward_pass(output_labels)
-
-    # print("dW",net.layers[1][0].dW)
-    # print("dB",net.layers[1][0].dB)
-
-    # print("dw",net.layers[0][0].dW)
-    # print("db",net.layers[0][0].dB)
-            
-    #net = Network([2,1])
     
     # 2D dataset to classify
     # 100 points split into two clusters (centers) with 2 features (x,y coordinate) inside center_box
@@ -253,7 +234,7 @@ if __name__ == "__main__":
     plt.show(block=False)
     
 
-    net = Network([2,3])
+    net = Network([2,4,3])
     output_labels = []
     for out in output:
         data = np.zeros((3,1))
@@ -272,7 +253,7 @@ if __name__ == "__main__":
     # y_in = float(input("y:"))
     # coord = np.array([[x_in,y_in]]).transpose()
     # print(net.forward_pass(coord))
-    net.stochastic_gradient_descent(training_data,100,100,0.1,test_data)
+    net.stochastic_gradient_descent(training_data,300,100,0.9,test_data)
     #print(net.forward_pass(coord))
     x_in = float(input("x:"))
     y_in = float(input("y:"))
