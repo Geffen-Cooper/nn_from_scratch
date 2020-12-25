@@ -12,6 +12,8 @@
 # If the parameters initialize to relatively large values the sigmoid will saturate
 # and the gradient won't change. Normalizing the data helped with this a lot.
 
+# This network has a lot of difficulty on the circular data, may need more nodes/layers
+
 # import libs
 import numpy as np
 from sklearn.datasets import make_blobs, make_moons, make_circles
