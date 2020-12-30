@@ -32,7 +32,7 @@ def cluster_example():
 def train_mnist():
     training_data, testing_data = get_mnist()
 
-    net = Network(784, quadratic_cost_prime)
+    net = Network(784, quadratic_cost, quadratic_cost_prime)
     net.add_fc_layer(50)
     net.add_sigmoid_layer(50)
     net.add_fc_layer(10)
@@ -40,7 +40,7 @@ def train_mnist():
 
     net.stochastic_gradient_descent(training_data,30,20,0.2,testing_data)
 
-    file_store = open("net_15_epochs.pickle", "wb")
+    file_store = open("net_50_hidden_30_epochs.pickle", "wb")
     pickle.dump(net, file_store)
     file_store.close()
 
