@@ -8,7 +8,7 @@ This project is a set of python classes for building simple neural networks from
 [Usage](#usage)  
 [Examples](#examples)  
 [Structuring Datasets](#structuring-datasets)  
-[Code Explained](#code-explained)  
+[Visualization](#visualization)  
 
 # Project Structure  
 
@@ -167,7 +167,7 @@ dataset.append((input, label))
 **See** *make_data.py* **for in more complex examples of how to create a dataset**
 
 
-# Code Explained
+# Visualization
 The classes in *NeuralNet.py* are created in a way that makes it easy to build and  
 train small feed-forward networks for simple classification tasks and experimenting
 with different hyperparameters. There are no convolution layers.   
@@ -184,5 +184,17 @@ In general the fully connected layer and activation layer come as a pair where t
 ![pass](readme_images/passes.png)  
 
 A detailed example of a forward and backward pass by hand for a sigmoid activation and MSE cost is shown:
-![detailed](readme_images/detailed.png)  
-Essentially, each layer has a forward pass and a backward pass that only works on local values.
+### Forward Pass for fully connected layer and activation layer
+* the notation below treats the fully connected layer and activation layer as a pair layer "l" 
+* in the code, these two layers are independent objects but the assumption is that an activation will always come after a fully connected layer  
+![forward](readme_images/forward_pass.png)  
+
+### Backward Pass for fully connected layer and sigmoid layer with MSE cost function  
+* this diagram has a lot going on but the equations at the bottom describe the backward pass concisely
+* for an activation layer, it multiplies the **upstream gradient** *elementwise* by the **local derivative of the activation function** evaluated at the **input** which is the **weighted sum** passed into it.
+* for a fully connected layer, it does a *matrix multiplication* of the **weight matrix transpose** and the **upstream gradient** which is denoted by an intermediate value called *delta* in the diagram
+* the reason we do this for a fully connected layer is because the derivative of the weighted sum with respect to the activation is the weights. However, the gradient will merge in the next layer back so the branches must be summed. So the weight matrix transpose multiplied by the upstream gradient accounts for the branching. This is understood more clearly when observing a single activation, such as a_1 in layer 2.
+![detailed](readme_images/detailed.png)   
+* now to get the partial derivatives of the weights we multiply the upstream gradient by the derivative of the weighted sum with respect to the weights, which is the activations. For the biases, we do the same thing but since the bias is multiplied by one, the derivative is 1.
+* so dw_dc = upstream_grad times activations and db_dc = upstream_grad
+* for the weights, this becomes an outer product so we get a matrix which is shown in purple
