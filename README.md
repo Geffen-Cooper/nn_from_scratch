@@ -7,7 +7,7 @@ This project is a set of python classes for building simple neural networks from
 [Project Structure](#project-structure)   
 [Usage](#usage)  
 [Examples](#examples)  
-[Creating and Structuring Datasets](creating-and-structuring-datasets)  
+[Structuring Datasets](#structuring-datasets)  
 [Code Explained](#code-explained)  
 
 # Project Structure  
@@ -15,7 +15,7 @@ This project is a set of python classes for building simple neural networks from
 The project is split up into the following directories:  
 **datasets**  
 * contains MNIST dataset and some test images of my own handwriting  
-* see [Creating and Structuring Datasets](creating-and-structuring-datasets) for how to add more data
+* see [Structuring Datasets](#structuring-datasets) for how to add more data
 
 **plots**  
 * plots of cost vs. epochs stored here  
@@ -149,7 +149,8 @@ y_in = float(input("y:"))/500
 coord = np.array([[x_in,y_in]]).transpose()
 print(choices[np.argmax(net.forward_pass(coord))])
 ```
-# Creating and Structuring Datasets
+
+# Structuring Datasets
 Training and test data are passed to the network as a list of tuples:
 
 [ (input_data_1, output_label_1), (input_data_2, output_label_2), ... ]  
@@ -169,4 +170,19 @@ dataset.append((input, label))
 # Code Explained
 The classes in *NeuralNet.py* are created in a way that makes it easy to build and  
 train small feed-forward networks for simple classification tasks and experimenting
-with different hyperparameters. There are no convolution layers. 
+with different hyperparameters. There are no convolution layers.   
+
+### High Level Structure 
+In *NeuralNet.py* there layer classes which we can generalize as follows:
+* **input layer:** dummy layer to feed data sample into the network
+* **fully connected layer:** computes weighted sum of previous layer outputs
+* **activation layer:** passes previous layer output through activation
+* **output:** compares final layer output to the known label  
+![layers](readme_images/parts.png)  
+
+In general the fully connected layer and activation layer come as a pair where the weighted sum is passed to the activation layer on a forward pass and the upstream gradient multiplied element-wise by the local derivative of the activation gets passed back to the fully connected layer on a backwards pass.  
+![pass](readme_images/passes.png)  
+
+A detailed example of a forward and backward pass by hand for a sigmoid activation and MSE cost is shown:
+![detailed](readme_images/detailed.png)  
+Essentially, each layer has a forward pass and a backward pass that only works on local values.
