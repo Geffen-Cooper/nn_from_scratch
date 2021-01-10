@@ -1,8 +1,21 @@
-''' This is a network is built using a modular layer structure using the ideas
-    of computational graphs for backpropagation. Most of the code is original
-    but some code (and ideas), including the testing, cost functions, and the
-    stochastic gradient descent function control flow, is taken from Michael 
-    Nielson's Neural Networks and Deep Learning Book.''' 
+'''This file contains a set of classes for building simple neural networks
+   using a modular layer structure. Most of the code is "original" (not
+   directly copied) but some of the functions, ideas, and control flow 
+   are taken from Michael Nielson's Neural Networks and Deep Learning Book. 
+   These include the code for the cost functions, code for the 
+   stochastic_gradient_descent() function, and the control flow for the 
+   mini_batch_pass() function. Also, the explanations of backpropagation 
+   from Nielson's book and Stanford CS231n helped me figure out how to program 
+   backpropagation in this code. I also took inspiration from a variety of
+   examples I found online including:
+   
+   https://stackabuse.com/creating-a-neural-network-from-scratch-in-python/
+   https://towardsdatascience.com/deep-neural-networks-from-scratch-in-python-451f07999373
+   https://towardsai.net/p/machine-learning/nothing-but-numpy-understanding-creating-neural-networks-with-computational-graphs-from-scratch-6299901091b0
+   https://towardsdatascience.com/math-neural-network-from-scratch-in-python-d6da9f29ce65.''' 
+
+
+
 
 # import libs
 import numpy as np
@@ -10,12 +23,15 @@ import random
 import matplotlib.pyplot as plt
 
 
-'''=============================================================
-   ======================= LAYER CLASSES =======================
-   ============================================================='''
+'''===========================================================================================
+   ====================================== LAYER CLASSES ======================================
+   ==========================================================================================='''
 
-# the fully connected layer calculates the weighted sum (the "z" neurons)
-# it will need to keep track of the weights, biases, and partial derivatives
+
+# ==================================== Fully Connected Layer =================================
+# The fully connected layer calculates the weighted sum (the "z" values) of the prior layer's
+# activations. It also keeps track of the weights, biases, and partial derivatives.
+
 class FullyConnectedLayer:
 
     # need to know the number of neurons in this layer and previous layer to form weight matrix
@@ -25,20 +41,18 @@ class FullyConnectedLayer:
 
             # initialize a small random weight matrix with N rows and N_p columns
             self.W = np.random.randn(self.N, self.N_p)/10
-            # print(self.W)
 
-            # empty weight gradient matrix
+            # empty weight partial derivative matrix
             self.dW = np.zeros((self.N, self.N_p))
 
             # initialize a small random bias column vector with N rows
             self.B = np.random.randn(self.N,1)/10
-            # print(self.B)
 
-            # empty bias gradient vector
+            # empty bias partial derivative vector
             self.dB = np.zeros((self.N,1))
 
             # keep track of a column vector of weighted sums for the layer
-            self.z_cache = np.zeros((self.N,1))
+            self.Z = np.zeros((self.N,1))
 
             # keep a running sum for the weights and biases, used for SGD
             self.dW_sum = np.zeros((self.N, self.N_p))
@@ -47,19 +61,24 @@ class FullyConnectedLayer:
             # store the previous layer activations for forward/backward prop
             self.previous_layer_activations = np.zeros((previous_layer_size,1))
 
-    # do a weight matrix-activation vector multiplication to get the weighted sum for the layer
+    # do a (weight matrix)*(activation vector) multiplication to get the weighted sum for the layer
     def forward_propagation(self, previous_layer_activations):
-        # get the weighted sum for this layer
+        # check that the matrix multiplication is possible
         if self.W.shape[1] != previous_layer_activations.shape[0]:
             print("mismatch between weight matrix columns and activation rows")
             print(self.W.shape[1],  previous_layer_activations.shape[0])
             exit()
         else:
-            self.z_cache = np.dot(self.W, previous_layer_activations) + self.B
-            self.previous_layer_activations = previous_layer_activations
-        return self.z_cache
+            # get the weighted sum for this layer
+            self.Z = np.dot(self.W, previous_layer_activations) + self.B
 
-    # this calculates the partial derivatives for a backward pass
+            # update the previous layer activations
+            self.previous_layer_activations = previous_layer_activations
+
+        # return the weighted sum for the next layer to use    
+        return self.Z
+
+    # this calculates the partial derivatives for a backward pass of one training input
     def backward_propagation(self, upstream_gradient):
         # first calculate the partial derivatives for the weights, represents an outer product of two vectors
         self.dW = np.dot(upstream_gradient, self.previous_layer_activations.transpose())
@@ -78,67 +97,78 @@ class FullyConnectedLayer:
         self.W -= eta*(self.dW_sum / mini_batch_size)
         self.B -= eta*(self.dB_sum / mini_batch_size)
 
+        # reset the sums
         self.dW_sum[:] = 0
         self.dB_sum[:] = 0
 
-# the sigmoid layer is a nonlinearity activation function layer
+
+# ==================================== Sigmoid Layer =====================================
+# the sigmoid layer is a nonlinearity activation function layer that is placed after a 
+# fully connected layer
+
 class SigmoidLayer:
     def __init__(self, layer_size):
         self.N = layer_size
 
         # column vector of activations
-        self.a_cache = np.zeros((self.N,1))
+        self.activation = np.zeros((self.N,1))
     
     # apply the activation function on the weighted sum
     def forward_propagation(self, weighted_sum):
-        self.a_cache = 1 / (1 + np.exp(-weighted_sum))
-        return self.a_cache
+        self.activation = 1 / (1 + np.exp(-weighted_sum))
+        return self.activation
 
     # multiply elementwise the derivative of the activation function by the upstream gradient and return
     def backward_propagation(self, upstream_gradient):
-        # a_cache represents sig(z) and sig_prime(z) = sig(z)*(1-sig(z))
-        sigmoid_prime = self.a_cache*(1-self.a_cache) 
+        # activation represents sig(z) and sig_prime(z) = sig(z)*(1-sig(z))
+        sigmoid_prime = self.activation*(1-self.activation) 
         return np.multiply(sigmoid_prime, upstream_gradient)
 
     # place holder function to make SGD function readable, this layer has no parameters
     def update_parameters(self, mini_batch_size, eta):
         pass
 
+
+# ==================================== Reli Layer ====================================
 # the relu layer is a nonlinearity activation function layer
+
 class ReluLayer:
     def __init__(self, layer_size):
         self.N = layer_size
 
         # column vector of activations
-        self.a_cache = np.zeros((self.N,1))
+        self.activation = np.zeros((self.N,1))
     
     # apply the activation function on the weighted sum
     def forward_propagation(self, weighted_sum):
-        self.a_cache = np.maximum(weighted_sum,0)
-        return self.a_cache
+        self.activation = np.maximum(weighted_sum,0)
+        return self.activation
 
     # multiply elementwise the derivative of the activation function by the upstream gradient and return
     def backward_propagation(self, upstream_gradient):
-        relu_prime = (self.a_cache > 0)
+        relu_prime = (self.activation > 0)
         return np.multiply(relu_prime, upstream_gradient)
 
     # place holder function to make SGD function readable, this layer has no parameters
     def update_parameters(self, mini_batch_size, eta):
         pass
 
+
+# ==================================== Softmax Layer ====================================
 # the softmax layer is an output function layer
+
 class SoftmaxLayer:
     def __init__(self, layer_size):
         self.N = layer_size
 
         # column vector of activations
-        self.a_cache = np.zeros((self.N,1))
+        self.activation = np.zeros((self.N,1))
     
     # apply the activation function on the weighted sum
     def forward_propagation(self, weighted_sum):
         exps = np.exp(weighted_sum)
-        self.a_cache = exps / (np.sum(exps))
-        return self.a_cache
+        self.activation = exps / (np.sum(exps))
+        return self.activation
 
     # multiply elementwise the derivative of the activation function by the upstream gradient and return
     def backward_propagation(self, upstream_gradient):
@@ -148,47 +178,50 @@ class SoftmaxLayer:
     def update_parameters(self, mini_batch_size, eta):
         pass
 
+
+# ====================================== Input Layer ====================================
 # this is a dummy layer used for the input to keep modular structure
+
 class InputLayer:
     def __init__(self, layer_size):
         self.N = layer_size
 
         # column vector of activations
-        self.a_cache = np.zeros((self.N,1))
+        self.activation = np.zeros((self.N,1))
 
     def update_parameters(self, mini_batch_size, eta):
         pass
 
 
 
-'''=============================================================
-   ====================== COST FUNCTIONS =======================
-   ============================================================='''
+'''===========================================================================================
+   ====================================== COST FUNCTIONS =====================================
+   ==========================================================================================='''
 
-# calculate cost for one sample
+# calculate quadratic cost for one training sample
 def quadratic_cost(expected_output, activation):
     return 1/2 * np.sum(np.square(expected_output-activation))
 
-# derivatve of cost function
+# derivatve of quadratic cost function
 def quadratic_cost_prime(expected_output, activation):
     return (activation - expected_output)
 
-# calculate cost for one sample
+# calculate cross entropy cost for one sample
 def cross_entropy_cost(expected_output, activation):
     return np.sum(np.nan_to_num(-expected_output*np.log(activation)-(1-expected_output)*np.log(1-activation)))
 
-# derivatve of cost function
+# derivatve of cross entropy cost function
 def cross_entropy_cost_prime(expected_output, activation):
     pass
     #return (activation - expected_output)
 
 
 
-'''=============================================================
-   ======================= DRIVER CLASS ========================
-   ============================================================='''
+'''===========================================================================================
+   ====================================== DRIVER CLASS =======================================
+   ==========================================================================================='''
 
-# this class is used to build a neural network from the layer classes
+# this class is used to build and train a neural network from the layer classes
 class Network:
     # pass in the input size, cost function, and the derivative of the cost function
     def __init__(self, input_size, cost, cost_prime):
@@ -224,7 +257,7 @@ class Network:
     # do a forward pass through the layer of the network
     def forward_pass(self, input_data):
         # set the input layer activations to the input data
-        self.layers[0].a_cache = input_data
+        self.layers[0].activation = input_data
         output = input_data
 
         # for each layer (not including the input) do forward propagation
@@ -236,7 +269,7 @@ class Network:
     # do a backward pass through the layer of the network, return the cost
     def backward_pass(self, expected_output):
         # get the first upstream gradient, the derivative of the cost function w/r/t the activation of the output
-        upstream_gradient = self.cost_prime(expected_output, self.layers[-1].a_cache)
+        upstream_gradient = self.cost_prime(expected_output, self.layers[-1].activation)
 
         # print("first upstream gradient", upstream_gradient)
         
