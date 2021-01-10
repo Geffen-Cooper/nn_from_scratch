@@ -49,15 +49,15 @@ if __name__ == "__main__":
     #cluster_example()
 
 # ======= Example 2, classify handwritten digits ===============
-    train_mnist() 
+    #train_mnist() 
 # ================= test the network ==========================
-    # digit = Image.open("../../data/digit.png").convert('L')
-    # digit = np.asarray(digit).astype(np.float32)/255
-    # digit = digit.reshape(784,1)
+    digit = Image.open("../datasets/my_handwriting/9.png").convert('L')
+    digit = np.asarray(digit).astype(np.float32)/255.0
+    digit = digit.reshape(784,1)
 
-    # file_store = open("net_15_epochs.pickle", "rb")
-    # net = pickle.load(file_store)
-    # file_store.close()
+    file_store = open("../pre-trained/net_50_hidden_30_epochs.pickle", "rb")
+    net = pickle.load(file_store)
+    file_store.close()
 
-    # print("It is a ....", np.argmax(net.forward_pass(digit)))
+    print("It is a ....", np.argmax(net.forward_pass(digit)))
     

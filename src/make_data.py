@@ -132,7 +132,7 @@ def gen_circles():
     return (training_data, test_data, choices)
 
 def get_mnist():
-    mnist = MNIST('../../data/MNIST')
+    mnist = MNIST('../data/MNIST')
     print("Loading Data ... ")
     x_train, y_train = mnist.load_training() #60000 samples
     x_test, y_test = mnist.load_testing()    #10000 samples
