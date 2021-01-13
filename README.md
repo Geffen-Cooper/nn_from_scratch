@@ -1,6 +1,6 @@
 # Simple Neural Network from Scratch  
 
-This project is a set of python classes for building simple neural networks from scratch. Some of the code, ideas, and inspiration are taken from other sources which is explained and cited in the comments of *src/NeuralNet.py*.
+This project is a set of python classes for building simple neural networks from scratch. Some of the code, ideas, and inspiration are taken from other sources which is explained and cited in the comments of *src/NeuralNet.py*. There are no convolution layers or regularization methods currently. One of the example networks is able to classify 9728/10000 images in the MNIST test set.  
 
 # Sections  
 
@@ -227,9 +227,7 @@ dataset.append((input, label))
 # Visualization
 The classes in *NeuralNet.py* are created in a way that makes it easy to build and  
 train small feed-forward networks for simple classification tasks and experimenting
-with different hyperparameters. There are no convolution layers or regularization methods  
-currently. One of the example networks is able to classify 9710/10000 images in the MNIST
-test set.  
+with different hyperparameters.
 
 ### High Level Structure 
 In *NeuralNet.py* there layer classes which we can generalize as follows:
