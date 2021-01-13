@@ -59,8 +59,33 @@ net.stochastic_gradient_descent(training_data, number_of_epochs, batch_size, lea
 ```
 ```
 console output:
----
+Epoch 0: Test_data: 8902/10000 Train Cost=0.11722658281111872 Test Cost=0.1128977384523250
+Epoch 1: Test_data: 9085/10000 Train Cost=0.08583412961550049 Test Cost=0.0822464164454141
+Epoch 2: Test_data: 9177/10000 Train Cost=0.07403771585455693 Test Cost=0.07159634300435123
+Epoch 3: Test_data: 9240/10000 Train Cost=0.06692385932641985 Test Cost=0.06512600340515386
+Epoch 4: Test_data: 9280/10000 Train Cost=0.06244376169346048 Test Cost=0.06085638122703422
+Epoch 5: Test_data: 9326/10000 Train Cost=0.05859600076480681 Test Cost=0.05776851656578591
+Epoch 6: Test_data: 9352/10000 Train Cost=0.05541301406636375 Test Cost=0.05480281592166194
+Epoch 7: Test_data: 9381/10000 Train Cost=0.05303608169350595 Test Cost=0.05272980943624705
+Epoch 8: Test_data: 9409/10000 Train Cost=0.05056847729172933 Test Cost=0.05085431989952933
+Epoch 9: Test_data: 9442/10000 Train Cost=0.048446194215249254 Test Cost=0.0487468057231946
+Epoch 10: Test_data: 9456/10000 Train Cost=0.046551491569778836 Test Cost=0.047216540074613
+Epoch 11: Test_data: 9460/10000 Train Cost=0.04487991727697655 Test Cost=0.0460620296826043
+Epoch 12: Test_data: 9475/10000 Train Cost=0.043547284544788734 Test Cost=0.044833723503173
+Epoch 13: Test_data: 9501/10000 Train Cost=0.042135601036447 Test Cost=0.04368067406405916
+Epoch 14: Test_data: 9504/10000 Train Cost=0.04082620489346034 Test Cost=0.0426357985844561
+Epoch 15: Test_data: 9523/10000 Train Cost=0.03975689189723435 Test Cost=0.0417279375596736
+Epoch 16: Test_data: 9535/10000 Train Cost=0.03856879162253755 Test Cost=0.0411223441852271
+Epoch 17: Test_data: 9536/10000 Train Cost=0.03734762009159344 Test Cost=0.0399475591335632
+Epoch 18: Test_data: 9539/10000 Train Cost=0.03669356713890372 Test Cost=0.0397739726891945
+Epoch 19: Test_data: 9554/10000 Train Cost=0.03569755734560578 Test Cost=0.0388635666367369
+Epoch 20: Test_data: 9560/10000 Train Cost=0.03478683579846275 Test Cost=0.0382654866198232
+Epoch 21: Test_data: 9568/10000 Train Cost=0.03408051217924574 Test Cost=0.0375377081324646
+Epoch 22: Test_data: 9578/10000 Train Cost=0.03340794070944498 Test Cost=0.0373592999928893
+Epoch 23: Test_data: 9579/10000 Train Cost=0.03252002049347548 Test Cost=0.0364276684765355
+Epoch 24: Test_data: 9583/10000 Train Cost=0.0317251449919646 Test Cost=0.03601985280092705
 ```
+![learning](plots/50_hidden_30_epochs_MSE_20_batch_0.2lr.png)  
 4. Store the network to a file:
 ```ruby
 file_handle = open("file_name.pickle", "wb") # open a file
@@ -86,21 +111,46 @@ print("Result ....", np.argmax(net.forward_pass(img))) # pass the image through 
 training_data, testing_data = get_mnist() # get the training and testing data
 
 # create a network
-net = Network(784, quadratic_cost, quadratic_cost_prime)
+net = Network(784, cross_entropy_cost, cross_entropy_cost_prime_SM)
 net.add_fc_layer(50)
-net.add_sigmoid_layer(50)
+net.add_relu_layer(50)
 net.add_fc_layer(10)
-net.add_sigmoid_layer(10)
+net.add_relu_layer(10)
+net.add_softmax_layer(10)
 
 # train the network
-net.stochastic_gradient_descent(training_data,30,20,0.2,testing_data)
+net.stochastic_gradient_descent(training_data,20,32,0.04,testing_data)
 
 # store the network to a file
-file_store = open("net_50_hidden_30_epochs.pickle", "wb")
+file_store = open("../pre-trained/_50_hidden_20_epochs_CE2.pickle", "wb")
 pickle.dump(net, file_store)
 file_store.close()
 ```
-2. Test on an image of a digit (created by hand in microsoft paint, 28x28 px)
+
+```
+console output:  
+Epoch 0: Test_data: 9254 / 10000 Train Cost =  0.2598732152181026 Test Cost =  0.258077597107767  
+Epoch 1: Test_data: 9418 / 10000 Train Cost =  0.19378135333333085 Test Cost =  0.2000486292528665  
+Epoch 2: Test_data: 9547 / 10000 Train Cost =  0.14620308926256503 Test Cost =  0.1571220185445186  
+Epoch 3: Test_data: 9609 / 10000 Train Cost =  0.12160463877460954 Test Cost =  0.1365775716356947  
+Epoch 4: Test_data: 9627 / 10000 Train Cost =  0.10876644848106415 Test Cost =  0.1244021396833792  
+Epoch 5: Test_data: 9661 / 10000 Train Cost =  0.09708848893673981 Test Cost =  0.1136791221322680  
+Epoch 7: Test_data: 9676 / 10000 Train Cost =  0.08014775486035781 Test Cost =  0.1072875059952299  
+Epoch 8: Test_data: 9684 / 10000 Train Cost =  0.07081856319168572 Test Cost =  0.1007006427819649  
+Epoch 9: Test_data: 9671 / 10000 Train Cost =  0.06798449645739901 Test Cost =  0.1014454039079973  
+Epoch 10: Test_data: 9706 / 10000 Train Cost =  0.06154090155882134 Test Cost =  0.097396495176051  
+Epoch 11: Test_data: 9718 / 10000 Train Cost =  0.05879095415597285 Test Cost =  0.093961334922342  
+Epoch 12: Test_data: 9687 / 10000 Train Cost =  0.05697602690477164 Test Cost =  0.100156864652717  
+Epoch 13: Test_data: 9720 / 10000 Train Cost =  0.05155921362014973 Test Cost =  0.092171592768846  
+Epoch 14: Test_data: 9721 / 10000 Train Cost =  0.050302142623740116 Test Cost =  0.09432746391280  
+Epoch 15: Test_data: 9711 / 10000 Train Cost =  0.044366312824647224 Test Cost =  0.09064842284499  
+Epoch 16: Test_data: 9726 / 10000 Train Cost =  0.043713930603209286 Test Cost =  0.09186506621935  
+Epoch 17: Test_data: 9724 / 10000 Train Cost =  0.03886184427803502 Test Cost =  0.090812193451396  
+Epoch 18: Test_data: 9729 / 10000 Train Cost =  0.03554698541988986 Test Cost =  0.087452084936556  
+Epoch 19: Test_data: 9728 / 10000 Train Cost =  0.03497675159863277 Test Cost =  0.090327809761121  
+```
+
+Test on an image of a digit (created by hand in microsoft paint, 28x28 px)
 ```ruby
 digit = Image.open("../datasets/my_handwriting/9.png").convert('L')
 digit = np.asarray(digit).astype(np.float32)/255.0
@@ -112,6 +162,13 @@ file_store.close()
 
 print("It is a ....", np.argmax(net.forward_pass(digit)))
 ```
+
+![digit](datasets/my_handwriting/digit.png) 
+
+```
+It is a .... 8
+```
+
 ### Example 2: train on artificial cluster data from scikit-learn  
 This example can be found in *build_network.py*
 ```ruby
@@ -170,7 +227,9 @@ dataset.append((input, label))
 # Visualization
 The classes in *NeuralNet.py* are created in a way that makes it easy to build and  
 train small feed-forward networks for simple classification tasks and experimenting
-with different hyperparameters. There are no convolution layers.   
+with different hyperparameters. There are no convolution layers or regularization methods  
+currently. One of the example networks is able to classify 9710/10000 images in the MNIST
+test set.  
 
 ### High Level Structure 
 In *NeuralNet.py* there layer classes which we can generalize as follows:
