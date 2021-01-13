@@ -129,7 +129,7 @@ class SigmoidLayer:
         pass
 
 
-# ==================================== Reli Layer ====================================
+# ==================================== Relu Layer ====================================
 # the relu layer is a nonlinearity activation function layer
 
 class ReluLayer:
@@ -164,15 +164,15 @@ class SoftmaxLayer:
         # column vector of activations
         self.activation = np.zeros((self.N,1))
     
-    # apply the activation function on the weighted sum
+    # apply the softmax formula
     def forward_propagation(self, weighted_sum):
-        exps = np.exp(weighted_sum)
-        self.activation = exps / (np.sum(exps))
+        self.activation = np.exp(weighted_sum) / (np.sum(np.exp(weighted_sum)))
         return self.activation
 
-    # multiply elementwise the derivative of the activation function by the upstream gradient and return
+    # softmax will be used with cross entropy loss, the derivative will account for softmax derivative
+    # and will skip the softmax layer on backprop anyways to simplify
     def backward_propagation(self, upstream_gradient):
-        pass
+        return upstream_gradient
 
     # place holder function to make SGD function readable, this layer has no parameters
     def update_parameters(self, mini_batch_size, eta):
@@ -206,14 +206,24 @@ def quadratic_cost(expected_output, activation):
 def quadratic_cost_prime(expected_output, activation):
     return (activation - expected_output)
 
-# calculate cross entropy cost for one sample
+# multi class cross entropy cost
 def cross_entropy_cost(expected_output, activation):
-    return np.sum(np.nan_to_num(-expected_output*np.log(activation)-(1-expected_output)*np.log(1-activation)))
+    return -np.sum(expected_output*np.log(activation))
 
-# derivatve of cross entropy cost function
-def cross_entropy_cost_prime(expected_output, activation):
-    pass
-    #return (activation - expected_output)
+# combine dc_da*da_dz to get this simplified form for back prop
+def cross_entropy_cost_prime_SM(expected_output, activation):
+    return (activation - expected_output)
+
+# calculate cross entropy cost for one sample (used with sigmoid)
+# binary cross entropy
+# def cross_entropy_cost(expected_output, activation):
+#     return np.sum(np.nan_to_num(-expected_output*np.log(activation)-(1-expected_output)*np.log(1-activation)))
+
+#binary cross entropy
+# derivatve of cross entropy (use with sigmoid)
+# def cross_entropy_cost_prime(expected_output, activation):
+#     return (expected_output-activation) #/(activation*(1-activation)) 
+    # this denominator cancels with sig_prime but can cause nan issues so remove it and account for in sigmoid layer
 
 
 
@@ -224,11 +234,13 @@ def cross_entropy_cost_prime(expected_output, activation):
 # this class is used to build and train a neural network from the layer classes
 class Network:
     # pass in the input size, cost function, and the derivative of the cost function
-    def __init__(self, input_size, cost, cost_prime):
+    # if using softmax with cross entropy loss then set arg to true so can account for backprop simplification
+    def __init__(self, input_size, cost, cost_prime, is_SM_CE=False):
         self.cost = cost
         self.cost_prime = cost_prime
         self.cost_points = [] # calclate cost for each epoch so can plot
         self.cost_points_test = []
+        self.is_SM_CE = is_SM_CE
 
         # make a list of layers
         self.layers = []
@@ -253,6 +265,11 @@ class Network:
     def add_relu_layer(self, layer_size):
         self.layers.append(ReluLayer(layer_size))
         self.prev_layer_size = layer_size
+
+    # append a softmax layer to the network
+    def add_softmax_layer(self, layer_size):
+        self.layers.append(SoftmaxLayer(layer_size))
+        self.prev_layer_size = layer_size
     
     # do a forward pass through the layer of the network
     def forward_pass(self, input_data):
@@ -268,16 +285,23 @@ class Network:
 
     # do a backward pass through the layer of the network, return the cost
     def backward_pass(self, expected_output):
-        # get the first upstream gradient, the derivative of the cost function w/r/t the activation of the output
-        upstream_gradient = self.cost_prime(expected_output, self.layers[-1].activation)
+        if self.is_SM_CE == False:
+            # get the first upstream gradient, the derivative of the cost function w/r/t the activation of the output
+            upstream_gradient = self.cost_prime(expected_output, self.layers[-1].activation)
 
-        # print("first upstream gradient", upstream_gradient)
+            # print("first upstream gradient", upstream_gradient)
+            
+            # we backward pass from the last layer to the first hidden layer
+            for layer in range(1, len(self.layers)):
+                upstream_gradient = self.layers[-layer].backward_propagation(upstream_gradient)
         
-        # we backward pass from the last layer to the first hidden layer
-        for layer in range(1, len(self.layers)):
-            # back pass through the sigmoid
-            upstream_gradient = self.layers[-layer].backward_propagation(upstream_gradient)
-        #print("upstream gradient", upstream_gradient)
+        # back prop slighlty different for last layer when doing soft max with cross entropy loss
+        else:
+            upstream_gradient = upstream_gradient = self.cost_prime(expected_output, self.layers[-1].activation)
+            # cost_prime combines softmax and cross entropy derivatives so skip softmax for backprop
+            for layer in range(2, len(self.layers)):
+                upstream_gradient = self.layers[-layer].backward_propagation(upstream_gradient)
+
         
     # update the parameters over the gradient of one mini batch (based on Nielson's code)
     def mini_batch_pass(self, eta, mini_batch):
