@@ -49,7 +49,7 @@ def train_mnist():
 
     net.stochastic_gradient_descent(training_data,20,32,0.04,testing_data)
 
-    file_store = open("../pre-trained/50_hidden_20_epochs_CE2.pickle", "wb")
+    file_store = open("../pre-trained/50_hidden_20_epochs_CE.pickle", "wb")
     pickle.dump(net, file_store)
     file_store.close()
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     digit = np.asarray(digit).astype(np.float32)/255.0
     digit = digit.reshape(784,1)
 
-    file_store = open("../pre-trained/50_hidden_20_epochs_CE2.pickle", "rb")
+    file_store = open("../pre-trained/50_hidden_20_epochs_CE.pickle", "rb")
     net = pickle.load(file_store)
     file_store.close()
 
