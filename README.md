@@ -1,3 +1,5 @@
+*resuming work on this*
+
 # Simple Neural Network from Scratch  
 
 This project is a set of python classes for building simple neural networks from scratch (i.e. using only NumPy and not frameworks such as PyTorch or TensorFlow). The purpose of this project was to get a better understanding of backpropagation by implementing it from scratch. Some of the code, ideas, and inspiration are taken from other sources which is explained and cited in the comments of *src/NeuralNet.py*. There are no convolution layers or regularization methods currently (only fully connected feedforward networks). One of the example networks is able to classify 9728/10000 images in the MNIST test set.
