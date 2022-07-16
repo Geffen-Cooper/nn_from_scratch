@@ -46,21 +46,21 @@ class FullyConnectedLayer(Layer):
 
     def backward(self, dL_dZ):
         # first find partial derivatives with respect to the weights
-         # make sure the dimensions match
+        # make sure the dimensions match
         if dL_dZ.shape[1] != self.A_p.T.shape[0]:
             print(f'Trying to do dL_dZ*A_p.T but dL_dZ is {self.W.shape} and A_p.T is {self.A_p.T.shape}')
             raise AssertionError("matrix dimensions invalid")
 
-        self.dW = np.dot(dL_dZ,self.A_p.T)
+        self.dW = np.dot(dL_dZ,self.A_p.T) # dL_dW = dL_dZ*dZ_dW
 
         # next get the partial derivatives with respect to the biases
-        self.dB = np.sum(dL_dZ,axis=1,keepdims=True)
+        self.dB = np.sum(dL_dZ,axis=1,keepdims=True) # dL_dB = dL_dZ
 
         # now return the local gradient times the upstream gradient
         if self.W.T.shape[1] != dL_dZ.shape[0]:
             print(f'Trying to do W.T*dL_dZ but W.T is {self.W.T.shape} and dL_dZ is {dL_dZ.shape}')
             raise AssertionError("matrix dimensions invalid")
-        return np.dot(self.W.T,dL_dZ)
+        return np.dot(self.W.T,dL_dZ) # dL_dA = dL_dZ*dZ_dA
 
     def update_parameters(self, eta, reset=True):
         # subtract parameters by gradient over the batch
