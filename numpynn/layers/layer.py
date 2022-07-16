@@ -18,6 +18,11 @@ class Layer(ABC):
     def backward(self, upstream_gradient):
         pass
 
+    # need to know learning rate for parameter update
+    @abstractmethod
+    def update_parameters(self, eta, reset=True):
+        pass
+
     @abstractmethod
     def __str__(self):
         pass

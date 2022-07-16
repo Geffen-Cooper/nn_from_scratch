@@ -26,11 +26,6 @@ class FullyConnectedLayer(Layer):
         # need to store the current layer output for backprop
         self.Z = np.zeros((self.n_l,batch_size))
 
-        # keep a running sum for th weights and biases, averaged over a batch
-        # (we could have used dW and dB from above but we keep them separate for intuition)
-        self.dW_sum = np.zeros((self.n_l,self.n_p))
-        self.dB_sum = np.zeros((self.n_l,1))
-
         # need to store previous layer activations for backprop
         self.A_p = np.zeros((self.n_p,batch_size))
 
@@ -49,8 +44,33 @@ class FullyConnectedLayer(Layer):
 
         return self.Z
 
-    def backward(self, upstream_gradient):
-        print("backward")
+    def backward(self, dL_dZ):
+        # first find partial derivatives with respect to the weights
+         # make sure the dimensions match
+        if dL_dZ.shape[1] != self.A_p.T.shape[0]:
+            print(f'Trying to do dL_dZ*A_p.T but dL_dZ is {self.W.shape} and A_p.T is {self.A_p.T.shape}')
+            raise AssertionError("matrix dimensions invalid")
+
+        self.dW = np.dot(dL_dZ,self.A_p.T)
+
+        # next get the partial derivatives with respect to the biases
+        self.dB = np.sum(dL_dZ,axis=1,keepdims=True)
+
+        # now return the local gradient times the upstream gradient
+        if self.W.T.shape[1] != dL_dZ.shape[0]:
+            print(f'Trying to do W.T*dL_dZ but W.T is {self.W.T.shape} and dL_dZ is {dL_dZ.shape}')
+            raise AssertionError("matrix dimensions invalid")
+        return np.dot(self.W.T,dL_dZ)
+
+    def update_parameters(self, eta, reset=True):
+        # subtract parameters by gradient over the batch
+        self.W -= eta*self.dW
+        self.B -= eta*self.dB
+
+        # reset the gradients
+        if reset == True:
+            self.dW[:] = 0
+            self.dB[:] = 0
 
     def __str__(self):
         return f'W: shape --> {self.W.shape}\n\n{self.W}\n\nB: shape --> {self.B.shape}\n\n{self.B}'
