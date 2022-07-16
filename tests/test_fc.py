@@ -75,6 +75,7 @@ def test_forward():
 #     print("=== pytorch fc:===\n",torch_fc.weight,torch_fc.bias,torch_input)
 #     print("\n===numpynn fc:===\n",numpynn_fc,numpynn_input)
 
+
 # test backprop
 def test_backward():
     # get the layer variables
