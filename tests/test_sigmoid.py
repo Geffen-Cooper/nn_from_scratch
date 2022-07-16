@@ -1,7 +1,9 @@
-''' This file runs tests on the fully connected layer '''
+''' This file runs tests on the sigmoid layer '''
 
 import sys
 sys.path.append("../") # TODO: find a way to avoid this
+from test_fc import create_layer_variables, create_fc_layer
+from  numpynn.layers.sigmoid import sigmoid as sg
 from  numpynn.layers.fully_connected import fc as fc
 import torch
 import torch.nn as nn
@@ -13,24 +15,19 @@ from helper_funcs import *
 # ======================= Helper functions to set up the tests ======================== #
 # ===================================================================================== #
 
-# creates a fully connected layer in torch and numpynn with the same initial parameters
-def create_fc_layer(input_neurons, output_neurons):
-    # let pytorch determine the parameters randomly
-    torch_fc = nn.Linear(input_neurons,output_neurons)
-    numpynn_fc = fc.FullyConnectedLayer(input_neurons,output_neurons,1,rng)
+# creates a sigmoid layer in torch and numpynn
+def create_sg_layer(input_dimension):
+    torch_sg = nn.Sigmoid()
+    numpynn_sg = sg.SigmoidLayer(input_dimension)
 
-    # copy the values to numpynn
-    numpynn_fc.W = torch_fc.weight.detach().numpy()
-    numpynn_fc.B = torch_fc.bias.detach().numpy().reshape(numpynn_fc.B.shape)
+    return torch_sg, numpynn_sg
 
-    return torch_fc,numpynn_fc
-
-# creates random layer variables
-def create_layer_variables():
+# creates random layer dimension
+def create_random_dimension(dimensions=2):
+    # assume 2D inputs for now, TODO: for conv will be higher dimensionality
     input_neurons = rng.integers(1,100)
-    output_neurons = rng.integers(1,10)
     batch_size = 2**rng.integers(0,5)
-    return input_neurons, output_neurons, batch_size
+    return (input_neurons, batch_size)
 
 
 ''' ================================== TEST FUNCTIONS ================================='''
@@ -40,19 +37,18 @@ def create_layer_variables():
 # ==================================== FORWARD PROP =================================== #
 # ===================================================================================== #
 
+# test forward prop
 def test_forward():
-    # get the layer variables
-    (input_neurons, output_neurons, batch_size) = create_layer_variables()
-
     # create the layers
-    (torch_fc,numpynn_fc) = create_fc_layer(input_neurons,output_neurons)
+    dim = create_random_dimension()
+    (torch_sg,numpynn_sg) = create_sg_layer(dim)
 
     # create the input batch
-    (torch_input, numpynn_input) = create_random_batch((input_neurons, batch_size))
+    (torch_input, numpynn_input) = create_random_batch(dim)
 
-    # compare the forward pass outputs, note that torch does xW^T and numpynn does Wx
-    numpynn_out = numpynn_fc.forward(numpynn_input)
-    torch_out = torch_fc(torch_input.T).detach().numpy().T
+    # compare the forward pass outputs
+    numpynn_out = numpynn_sg.forward(numpynn_input)
+    torch_out = torch_sg(torch_input).detach().numpy()
 
     # implementations slightly different so assert precision threshold of 1e^-5
     out_diff = np.abs(torch_out - numpynn_out)
@@ -60,20 +56,19 @@ def test_forward():
 
 # TODO: add a verbose option to the test to see the input, parameters, output
 # def print_test():
-#     print("=== pytorch fc:===\n",torch_fc.weight,torch_fc.bias,torch_input)
-#     print("\n===numpynn fc:===\n",numpynn_fc,numpynn_input)
-
+#     pass
 
 
 # ===================================================================================== #
-# ===================================== BACK PROP ===================================== #
+# ====================================== BACK PROP ==================================== #
 # ===================================================================================== #
 
+# tested by putting a sigmoid after a fully connected layer
 def test_backward():
-    # get the layer variables
+    # get the fc layer variables
     (input_neurons, output_neurons, batch_size) = create_layer_variables()
 
-    # create the layers
+    # create the fc layer
     (torch_fc,numpynn_fc) = create_fc_layer(input_neurons,output_neurons)
 
     # create the input batch
@@ -82,9 +77,12 @@ def test_backward():
     # create the output labels
     (torch_label, numpynn_label) = create_random_batch((output_neurons, batch_size))
 
-    # get the output
-    torch_pred, numpynn_pred = torch_fc(torch_input.T), numpynn_fc.forward(numpynn_input)
+    # create the sigmoid layers
+    (torch_sg,numpynn_sg) = create_sg_layer((output_neurons, batch_size))
 
+    # forward pass
+    torch_pred, numpynn_pred = torch_sg(torch_fc(torch_input.T)), numpynn_sg.forward(numpynn_fc.forward(numpynn_input))
+    
     # Loss = label - output
     # the partial derivative of the Loss w/r/t the outputs is -1 (dL_dy)
 
@@ -93,8 +91,8 @@ def test_backward():
     torch_loss.backward()
 
     # manually compute the output gradient and backprop in numpynn
-    dL_dy = np.ones((output_neurons,batch_size))*-1
-    numpynn_fc.backward(dL_dy)
+    dL_dy = np.ones(numpynn_label.shape)*-1
+    numpynn_fc.backward(numpynn_sg.backward(dL_dy))
 
     # compare the calculated gradients for each parameter up to a precision
     diff_dW = np.abs(numpynn_fc.dW - torch_fc.weight.grad.numpy())
