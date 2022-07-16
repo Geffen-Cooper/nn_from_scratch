@@ -1,0 +1,5 @@
+-Organize the tests more so they can be executed from a folder
+-Add print statements to the tests so we can see the values being compared
+-Naive loss is ok for this test but define a function for the gradient for numpynn
+
+-Multilayer testing with actual loss functions and activations
