@@ -1,0 +1,11 @@
+getting conda to work with vscode without setting the global path
+-vscode should automatically detect the python installed with conda if selected
+ "register anaconda3 as default python" on installation
+-to be able to use conda in the terminal, you must tell vscode where the conda path
+ is, assuming it was not added to the global path. Specify in user settings conda path
+-for some reason powershell doesn't recognize conda but cmd will automatically activate conda
+ when a new terminal window is opened assuming the python activate env in current terminal is active
+-you can also call conda from the cmd terminal since the path is specified in the user settings
+-if using a remote machine without vscode, you can install conda and add it to the path using the
+ .bashrc. Or you can create a script that adds conda to the path while running a certain program
+ so that when the program finishes, it will remove conda from the path.

@@ -1,7 +1,14 @@
 In order of priority
--Add activation layers
--Add cost functions and their derivatives
+-Add softmax and crossentropy (follow pytorch convention)
+-Explicity have the softmax backprop as an option for cases where don't have cross entropy right after,
+ for example, can have softmax then NLL loss like in the FADA paper. I assume there is some simlpification
+ when we do a log after a softmax
+-add a log softmax that is more stable?
 -Add a network class for combining layers and doing SGD
 -Multilayer testing with actual loss functions and activations
+-Add documentation and derivations for each layer
 -Add print statements to the tests so we can see the values being compared
--Naive loss is ok for this test but define a function for the gradient for numpynn
+-Show how we can use the neuralnet framework to do linear and logistic regression
+ with a linear layer and sigmoid activation
+-for a more cache friendly access, change the way batches are organized. We can
+ look at speed optimizations once everything is finished.
