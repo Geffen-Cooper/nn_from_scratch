@@ -31,7 +31,11 @@ class CrossEntropyLayer(Layer):
 
     # this is the most upstream gradient dL_dY
     def backward(self):
-        return self.Y_hat-self.Y
+        one_hot_label = np.zeros(self.Y_hat.shape)
+        one_hot_label[self.Y,np.arange(self.Y.shape[1])] = 1
+        self.Y_hat -= one_hot_label
+        self.Y_hat *= (1/self.Y.shape[1])
+        return self.Y_hat
 
     def update_parameters(self, eta, reset=True):
         # has no parameters

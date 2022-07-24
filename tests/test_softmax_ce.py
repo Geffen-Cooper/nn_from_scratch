@@ -7,7 +7,6 @@ from  numpynn.layers.softmax import softmax as sm
 from  numpynn.layers.cross_entropy import cross_entropy as ce
 from  numpynn.layers.fully_connected import fc as fc
 import torch
-import torch.nn.functional as F
 import torch.nn as nn
 import numpy as np
 from helper_funcs import *
@@ -52,7 +51,7 @@ def test_forward():
 
     # create the output labels (classification so column vector)
     (torch_label, numpynn_label) = create_random_batch((1,dim[1]))
-    torch_label = (torch_label[0]*3).long()
+    torch_label = (torch_label[0]*3).long() 
     numpynn_label = (numpynn_label*3).astype(int)
 
     # compare the forward pass outputs
@@ -74,39 +73,42 @@ def test_forward():
 # ====================================== BACK PROP ==================================== #
 # ===================================================================================== #
 
-# # tested by putting a MSE after a fully connected layer
-# def test_backward():
-#     # get the fc layer variables
-#     (input_neurons, output_neurons, batch_size) = create_layer_variables()
+# # tested by putting a cesm after a fully connected layer
+def test_backward():
+    # get the fc layer variables
+    (input_neurons, output_neurons, batch_size) = create_layer_variables()
 
-#     # create the fc layer
-#     (torch_fc,numpynn_fc) = create_fc_layer(input_neurons,output_neurons)
+    # create the fc layer
+    (torch_fc,numpynn_fc) = create_fc_layer(input_neurons,output_neurons)
 
-#     # create the input batch
-#     (torch_input, numpynn_input) = create_random_batch((input_neurons, batch_size))
+    # create the input batch
+    (torch_input, numpynn_input) = create_random_batch((input_neurons, batch_size))
 
-#     # create the output labels
-#     (torch_label, numpynn_label) = create_random_batch((output_neurons, batch_size))
+    # create the output labels (classification so column vector)
+    (torch_label, numpynn_label) = create_random_batch((1,batch_size))
+    torch_label = (torch_label[0]*3).long() 
+    numpynn_label = (numpynn_label*3).astype(int)
 
-#     # create the MSE layers
-#     (torch_mse,numpynn_mse) = create_mse_layer((output_neurons, batch_size))
+    # create the smce layer
+    (torch_smce, numpynn_sm, numpynn_ce) = create_smce_layer((output_neurons, batch_size))
 
-#     # forward pass
-#     torch_pred, numpynn_pred = torch_fc(torch_input.T), numpynn_fc.forward(numpynn_input)
+    # forward pass
+    torch_pred, numpynn_pred = torch_fc(torch_input.T), numpynn_fc.forward(numpynn_input)
     
-#     # Loss = MSE(label, output)
+    # Loss = smce(label, output)
 
-#     # compute the loss and backprop in pytorch
-#     torch_loss = torch_mse(torch_pred.T,torch_label)
-#     torch_loss.backward()
+    # compute the loss and backprop in pytorch
+    torch_loss = torch_smce(torch_pred, torch_label)
+    torch_loss.backward()
 
-#     # manually compute the output gradient and backprop in numpynn
-#     numpynn_loss = numpynn_mse.forward(numpynn_pred,numpynn_label)
-#     numpynn_fc.backward(numpynn_mse.backward())
+    # manually compute the output gradient and backprop in numpynn
+    sm = numpynn_sm.forward(numpynn_pred)
+    numpynn_loss = numpynn_ce.forward(sm, numpynn_label)
+    numpynn_fc.backward(numpynn_sm.backward(numpynn_ce.backward()))
 
-#     # compare the calculated gradients for each parameter up to a precision
-#     diff_dW = np.abs(numpynn_fc.dW - torch_fc.weight.grad.numpy())
-#     diff_dB = np.abs(numpynn_fc.dB - torch_fc.bias.grad.numpy().reshape(numpynn_fc.dB.shape))
+    # compare the calculated gradients for each parameter up to a precision
+    diff_dW = np.abs(numpynn_fc.dW - torch_fc.weight.grad.numpy())
+    diff_dB = np.abs(numpynn_fc.dB - torch_fc.bias.grad.numpy().reshape(numpynn_fc.dB.shape))
     
-#     assert ((diff_dW) < prec_thresh).all()
-#     assert ((diff_dB) < prec_thresh).all()
+    assert ((diff_dW) < prec_thresh).all()
+    assert ((diff_dB) < prec_thresh).all()
