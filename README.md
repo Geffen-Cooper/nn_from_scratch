@@ -1,6 +1,9 @@
-*resuming work on this*
+*resuming work on this project*  
+see [the old repo here](https://github.com/geffencooper/nn_from_scratch)
 
-# Simple Neural Network from Scratch  
+![Fully Connected Network Animation](diagrams/fc/fc_forward_pass.gif)
+
+<!-- # Simple Neural Network from Scratch  
 
 This project is a set of python classes for building simple neural networks from scratch (i.e. using only NumPy and not frameworks such as PyTorch or TensorFlow). The purpose of this project was to get a better understanding of backpropagation by implementing it from scratch. Some of the code, ideas, and inspiration are taken from other sources which is explained and cited in the comments of *src/NeuralNet.py*. There are no convolution layers or regularization methods currently (only fully connected feedforward networks). One of the example networks is able to classify 9728/10000 images in the MNIST test set.
 
@@ -263,4 +266,4 @@ A detailed example of a forward and backward pass by hand for a sigmoid activati
 ![detailed](readme_images/detailed.png)   
 * now to get the partial derivatives of the weights we multiply the upstream gradient by the derivative of the weighted sum with respect to the weights, which is the activations. For the biases, we do the same thing but since the bias is multiplied by one, the derivative is 1.
 * so dw_dc = upstream_grad times activations and db_dc = upstream_grad
-* for the weights, this becomes an outer product so we get a matrix which is shown in purple
+* for the weights, this becomes an outer product so we get a matrix which is shown in purple -->
