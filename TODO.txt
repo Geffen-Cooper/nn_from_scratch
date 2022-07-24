@@ -1,6 +1,6 @@
 In order of priority
--Add a network class for combining layers and doing SGD
--Multilayer testing with actual loss functions and activations
+-do a more involved test with parameter updates and loss plots
+-add a driver file and do sample tests on scikit clusters
 -Add documentation and derivations for each layer
 -Explicity have the softmax backprop as an option for cases where don't have cross entropy right after,
  for example, can have softmax then NLL loss like in the FADA paper. I assume there is some simlpification
