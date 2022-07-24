@@ -9,3 +9,14 @@ getting conda to work with vscode without setting the global path
 -if using a remote machine without vscode, you can install conda and add it to the path using the
  .bashrc. Or you can create a script that adds conda to the path while running a certain program
  so that when the program finishes, it will remove conda from the path.
+
+
+Network class
+-create an abstract base class, all networks should have a forward and a backward function, an add layer function,
+  a list of layers, a loss function, and an update parameters function
+-when creating a model the constructor needs nothing, to make the model we call the add layer function with
+ the constructor of the desired layer, also we need to set a loss function.
+-the forward function will take the input batch and call forward on all the layers and then return the raw output
+-then we can call the get loss using the labels and the raw output "model.loss(Y_hat,Y)"
+-then we call the backward function which will do backprop
+-then we can call step which will update all the parameters 

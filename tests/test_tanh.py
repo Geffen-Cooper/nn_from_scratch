@@ -15,9 +15,9 @@ from helper_funcs import *
 # ===================================================================================== #
 
 # creates a tanh layer in torch and numpynn
-def create_tanh_layer(input_dimension):
+def create_tanh_layer():
     torch_tanh = nn.Tanh()
-    numpynn_tanh = tanh.TanhLayer(input_dimension)
+    numpynn_tanh = tanh.TanhLayer()
 
     return torch_tanh, numpynn_tanh
 
@@ -33,7 +33,7 @@ def create_tanh_layer(input_dimension):
 def test_forward():
     # create the layers
     (feature_d, batch_size) = create_random_dimension()
-    (torch_tanh,numpynn_tanh) = create_tanh_layer((feature_d, batch_size))
+    (torch_tanh,numpynn_tanh) = create_tanh_layer()
 
     # create the input batch
     (torch_input, numpynn_input) = create_random_batch((feature_d, batch_size))
@@ -70,7 +70,7 @@ def test_backward():
     (torch_label, numpynn_label) = create_random_batch((output_neurons, batch_size))
 
     # create the tanh layers
-    (torch_tanh,numpynn_tanh) = create_tanh_layer((output_neurons, batch_size))
+    (torch_tanh,numpynn_tanh) = create_tanh_layer()
 
     # forward pass
     torch_pred, numpynn_pred = torch_tanh(torch_fc(torch_input.T)), numpynn_tanh.forward(numpynn_fc.forward(numpynn_input))

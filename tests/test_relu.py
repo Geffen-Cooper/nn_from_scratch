@@ -15,9 +15,9 @@ from helper_funcs import *
 # ===================================================================================== #
 
 # creates a sigmoid layer in torch and numpynn
-def create_relu_layer(input_dimension):
+def create_relu_layer():
     torch_relu = nn.ReLU()
-    numpynn_relu = relu.ReLULayer(input_dimension)
+    numpynn_relu = relu.ReLULayer()
 
     return torch_relu, numpynn_relu
 
@@ -33,7 +33,7 @@ def create_relu_layer(input_dimension):
 def test_forward():
     # create the layers
     (feature_d, batch_size) = create_random_dimension()
-    (torch_relu,numpynn_relu) = create_relu_layer((feature_d, batch_size))
+    (torch_relu,numpynn_relu) = create_relu_layer()
 
     # create the input batch
     (torch_input, numpynn_input) = create_random_batch((feature_d, batch_size))
@@ -70,7 +70,7 @@ def test_backward():
     (torch_label, numpynn_label) = create_random_batch((output_neurons, batch_size))
 
     # create the sigmoid layers
-    (torch_relu,numpynn_relu) = create_relu_layer((output_neurons, batch_size))
+    (torch_relu,numpynn_relu) = create_relu_layer()
 
     # forward pass
     torch_pred, numpynn_pred = torch_relu(torch_fc(torch_input.T)), numpynn_relu.forward(numpynn_fc.forward(numpynn_input))

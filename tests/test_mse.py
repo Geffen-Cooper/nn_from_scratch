@@ -15,9 +15,9 @@ from helper_funcs import *
 # ===================================================================================== #
 
 # creates a MSE layer in torch and numpynn
-def create_mse_layer(input_dimension):
+def create_mse_layer():
     torch_mse = nn.MSELoss()
-    numpynn_mse = mse.MSELayer(input_dimension)
+    numpynn_mse = mse.MSELayer()
 
     return torch_mse, numpynn_mse
 
@@ -33,7 +33,7 @@ def create_mse_layer(input_dimension):
 def test_forward():
     # create the layers
     (feature_d, batch_size) = create_random_dimension()
-    (torch_mse,numpynn_mse) = create_mse_layer((feature_d, batch_size))
+    (torch_mse,numpynn_mse) = create_mse_layer()
 
     # create the input batch
     (torch_input, numpynn_input) = create_random_batch((feature_d, batch_size))
@@ -73,7 +73,7 @@ def test_backward():
     (torch_label, numpynn_label) = create_random_batch((output_neurons, batch_size))
 
     # create the MSE layers
-    (torch_mse,numpynn_mse) = create_mse_layer((output_neurons, batch_size))
+    (torch_mse,numpynn_mse) = create_mse_layer()
 
     # forward pass
     torch_pred, numpynn_pred = torch_fc(torch_input.T), numpynn_fc.forward(numpynn_input)

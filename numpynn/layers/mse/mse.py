@@ -5,21 +5,14 @@ import math
 from ..layer import Layer
 
 class MSELayer(Layer):
-    # need the dimension of the input activations
-    def __init__(self, input_dimension):
-        self.dim = input_dimension
-
-        # store output value for backprop
-        self.Y = np.zeros(self.dim) 
-        self.Y_hat = np.zeros(self.dim)
-
     # L(Y,Y_hat)
     def forward(self, Y_hat, Y):
         # make sure the dimensions match
-        if (Y_hat.shape != self.Y.shape) or (Y.shape != self.Y.shape):
-            print(f'Expected shape is {self.Y.shape} and Y,Y_hat are {Y.shape},{Y_hat.shape}')
+        if (Y_hat.shape != Y.shape):
+            print(f'===> Expected shape is {Y.shape} and Y,Y_hat are {Y.shape},{Y_hat.shape}')
             raise AssertionError("matrix dimensions invalid")
         
+        # store the output and expected output for backprop
         self.Y = Y
         self.Y_hat = Y_hat
         

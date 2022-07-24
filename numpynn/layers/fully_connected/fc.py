@@ -6,7 +6,7 @@ from ..layer import Layer
 
 class FullyConnectedLayer(Layer):
     # input and output neurons define the weight matrix dimensions
-    def __init__(self, input_neurons, output_neurons, batch_size, rng):
+    def __init__(self, input_neurons, output_neurons, rng):
         self.n_p = input_neurons
         self.n_l = output_neurons
 
@@ -23,26 +23,19 @@ class FullyConnectedLayer(Layer):
         # need to store the partial derivatives of the bias vector
         self.dB = np.zeros((self.n_l,1))
 
-        # need to store the current layer output for backprop
-        self.Z = np.zeros((self.n_l,batch_size))
-
-        # need to store previous layer activations for backprop
-        self.A_p = np.zeros((self.n_p,batch_size))
-
-    # W*A = Z
+    # W*A + B = Z
     def forward(self, A_p):
         # make sure the dimensions match
         if self.W.shape[1] != A_p.shape[0]:
-            print(f'Trying to do W*A_p but W is {W.shape} and A_p is {A_p.shape}')
+            print(f'Trying to do W*A_p but W is {self.W.shape} and A_p is {A_p.shape}')
             raise AssertionError("matrix dimensions invalid")
         
-        # since B is a column vector the addition gets casted to the matrix columns
-        self.Z = np.dot(self.W,A_p) + self.B
-
-        # save the previous layer activations
+        # save the previous layer activations for backprop
         self.A_p = A_p
 
-        return self.Z
+        # since B is a column vector the addition gets casted to the matrix columns
+        return np.dot(self.W,A_p) + self.B
+
 
     def backward(self, dL_dZ):
         # first find partial derivatives with respect to the weights

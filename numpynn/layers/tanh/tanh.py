@@ -5,22 +5,11 @@ import math
 from ..layer import Layer
 
 class TanhLayer(Layer):
-    # need the dimension of the input activations
-    def __init__(self, input_dimension):
-        self.dim = input_dimension
-
-        # store activations for backprop
-        self.A = np.zeros(self.dim) 
-
     # g(Z)
     def forward(self, Z):
-        # make sure the dimensions match
-        if Z.shape != self.A.shape:
-            print(f'Expected shape is {self.A.shape} and Z is {Z.shape}')
-            raise AssertionError("matrix dimensions invalid")
-        
         x1 = np.exp(Z)
         x2 = np.exp(-Z)
+        # store activation for backpropr
         self.A = (x1 - x2) / (x1 + x2)
         return self.A
 

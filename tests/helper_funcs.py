@@ -41,7 +41,7 @@ def create_random_batch(dim):
 def create_fc_layer(input_neurons, output_neurons):
     # let pytorch determine the parameters randomly
     torch_fc = nn.Linear(input_neurons,output_neurons)
-    numpynn_fc = fc.FullyConnectedLayer(input_neurons,output_neurons,1,rng)
+    numpynn_fc = fc.FullyConnectedLayer(input_neurons,output_neurons,rng)
 
     # copy the values to numpynn
     numpynn_fc.W = torch_fc.weight.detach().numpy()

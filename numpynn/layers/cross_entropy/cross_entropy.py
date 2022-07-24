@@ -5,21 +5,14 @@ import math
 from ..layer import Layer
 
 class CrossEntropyLayer(Layer):
-    # need the dimension of the input activations
-    def __init__(self, input_dimension):
-        self.dim = input_dimension
-
-        # store output value for backprop
-        self.Y = np.zeros((1,self.dim[1])) 
-        self.Y_hat = np.zeros(self.dim)
-
     # L(Y,Y_hat)
     def forward(self, Y_hat, Y):
         # make sure the dimensions match
-        if (Y_hat.shape[1] != self.Y.shape[1]):
-            print(f'Expected shape is {self.Y.shape} and Y,Y_hat are {Y.shape},{Y_hat.shape}')
+        if (Y_hat.shape[1] != Y.shape[1]):
+            print(f'Expected shape is {Y.shape} and Y,Y_hat are {Y.shape},{Y_hat.shape}')
             raise AssertionError("matrix dimensions invalid")
         
+        # store output and expected output for backprop
         self.Y = Y
         self.Y_hat = Y_hat
 

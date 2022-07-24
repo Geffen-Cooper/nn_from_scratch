@@ -16,10 +16,10 @@ from helper_funcs import *
 # ===================================================================================== #
 
 # creates a softmax-cross entropy layer in torch and numpynn
-def create_smce_layer(input_dimension):
+def create_smce_layer():
     torch_smce = nn.CrossEntropyLoss()
-    numpynn_sm = sm.SoftmaxLayer(input_dimension)
-    numpynn_ce = ce.CrossEntropyLayer(input_dimension)
+    numpynn_sm = sm.SoftmaxLayer()
+    numpynn_ce = ce.CrossEntropyLayer()
 
     return torch_smce, numpynn_sm, numpynn_ce
 
@@ -35,7 +35,7 @@ def create_smce_layer(input_dimension):
 def test_forward():
     # create the layers
     (feature_d, batch_size) = create_random_dimension()
-    (torch_smce, numpynn_sm, numpynn_ce) = create_smce_layer((feature_d, batch_size))
+    (torch_smce, numpynn_sm, numpynn_ce) = create_smce_layer()
 
     # create the input batch
     (torch_input, numpynn_input) = create_random_batch((feature_d, batch_size))
@@ -81,7 +81,7 @@ def test_backward():
     numpynn_label = (numpynn_label*output_neurons).astype(int)
 
     # create the smce layer
-    (torch_smce, numpynn_sm, numpynn_ce) = create_smce_layer((output_neurons, batch_size))
+    (torch_smce, numpynn_sm, numpynn_ce) = create_smce_layer()
 
     # forward pass
     torch_pred, numpynn_pred = torch_fc(torch_input.T), numpynn_fc.forward(numpynn_input)

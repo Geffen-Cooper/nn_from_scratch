@@ -15,9 +15,9 @@ from helper_funcs import *
 # ===================================================================================== #
 
 # creates a sigmoid layer in torch and numpynn
-def create_sg_layer(input_dimension):
+def create_sg_layer():
     torch_sg = nn.Sigmoid()
-    numpynn_sg = sg.SigmoidLayer(input_dimension)
+    numpynn_sg = sg.SigmoidLayer()
 
     return torch_sg, numpynn_sg
 
@@ -33,7 +33,7 @@ def create_sg_layer(input_dimension):
 def test_forward():
     # create the layers
     (feature_d, batch_size) = create_random_dimension()
-    (torch_sg,numpynn_sg) = create_sg_layer((feature_d, batch_size))
+    (torch_sg,numpynn_sg) = create_sg_layer()
 
     # create the input batch
     (torch_input, numpynn_input) = create_random_batch((feature_d, batch_size))
@@ -70,7 +70,7 @@ def test_backward():
     (torch_label, numpynn_label) = create_random_batch((output_neurons, batch_size))
 
     # create the sigmoid layers
-    (torch_sg,numpynn_sg) = create_sg_layer((output_neurons, batch_size))
+    (torch_sg,numpynn_sg) = create_sg_layer()
 
     # forward pass
     torch_pred, numpynn_pred = torch_sg(torch_fc(torch_input.T)), numpynn_sg.forward(numpynn_fc.forward(numpynn_input))
