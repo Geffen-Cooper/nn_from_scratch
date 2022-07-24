@@ -20,16 +20,24 @@ class TorchFCNet(nn.Module):
         # list of layers
         self.layers = nn.ModuleList()
 
-        self.fc1 = nn.Linear(input_neurons,5)
-        self.fc2 = nn.Linear(5,output_neurons)
+        self.fc1 = nn.Linear(input_neurons,10)
+        self.fc2 = nn.Linear(10,10)
+        self.fc3 = nn.Linear(10,10)
+        self.fc4 = nn.Linear(10,output_neurons)
         self.layers.append(self.fc1)
         self.layers.append(self.fc2)
+        self.layers.append(self.fc3)
+        self.layers.append(self.fc4)
         self.relu = nn.ReLU()
 
     def forward(self, x):
         x = self.fc1(x)
         x = self.relu(x)
         x = self.fc2(x)
+        x = self.relu(x)
+        x = self.fc3(x)
+        x = self.relu(x)
+        x = self.fc4(x)
         return x  
 
 # copy the pytorch weights and architecture into the numpy model
@@ -59,8 +67,10 @@ def train_fc_classifiers(epochs,lr,batch_size):
     torch_fc_net, numpynn_fc_net = create_fc_nets(2,3)
 
     # create the data
-    X_train,Y_train,X_test,Y_test = gen_clusters(test_split=0.2)
+    X_train,Y_train,X_test,Y_test = gen_clusters(test_split=0.2,num_clusters=3)
     num_batches = X_train.shape[0] // batch_size
+
+    X_train = X_train / 2
 
     # create the loss functions
     torch_smce = nn.CrossEntropyLoss()
@@ -70,8 +80,8 @@ def train_fc_classifiers(epochs,lr,batch_size):
     # torch optimizer
     torch_optimizer = torch.optim.SGD(torch_fc_net.parameters(),lr=lr)
 
-    torch_losses = np.zeros(num_batches)
-    numpynn_losses = np.zeros(num_batches)
+    torch_losses = np.zeros(num_batches*epochs)
+    numpynn_losses = np.zeros(num_batches*epochs)
 
     # training loop
     for epoch in range(epochs):
@@ -91,10 +101,9 @@ def train_fc_classifiers(epochs,lr,batch_size):
             # loss calculation
             torch_loss = torch_smce(torch_out,torch.from_numpy(batch_Y).long())
             numpynn_loss = numpynn_ce.forward(numpynn_sm.forward(numpynn_out),np.expand_dims(batch_Y,axis=0))
-
-            torch_losses[batch_idx] = torch_loss.detach().item()
-            numpynn_losses[batch_idx] = numpynn_loss
-
+            
+            torch_losses[epoch*(num_batches) + batch_idx] = torch_loss.detach().item()
+            numpynn_losses[epoch*(num_batches) + batch_idx] = numpynn_loss
             # backward pass
             torch_loss.backward()
             numpynn_fc_net.backward_pass(numpynn_sm.backward(numpynn_ce.backward()))
@@ -106,4 +115,29 @@ def train_fc_classifiers(epochs,lr,batch_size):
     loss_diffs = torch_losses-numpynn_losses
     assert (loss_diffs < prec_thresh).all()
 
-train_fc_classifiers(1,0.001,32)
+    plt.plot(numpynn_losses)
+    print("avg loss:",np.sum(numpynn_losses[-num_batches:])/num_batches)
+    plt.show()
+    
+
+    # go through test data
+    torch_fc_net.eval()
+    num_batches = X_train.shape[0] // batch_size
+    torch_preds = np.zeros(X_train.shape[0])
+    numpynn_preds = np.zeros(X_train.shape[0])
+    for batch_idx in range(num_batches):
+        # forward pass
+        start = batch_idx*batch_size
+        end = start + batch_size
+        torch_out = torch_fc_net(torch.from_numpy(X_train[start:end]).float())
+        numpynn_out = numpynn_fc_net.forward_pass(X_train[start:end].T)
+
+        torch_preds[start:end] = np.argmax(torch_out.detach().numpy(),axis=1)
+        numpynn_preds[start:end] = np.argmax(numpynn_out,axis=0)
+   
+    print(np.sum(torch_preds == Y_train)/len(Y_train))
+    # # x_wrong = X_test[torch_preds != Y_test]
+    # # y_wrong = Y_test[torch_preds != Y_test]
+    show_clusters(X_train,Y_train,X_test,Y_test,torch_fc_net)
+
+train_fc_classifiers(20,0.0001,32)
