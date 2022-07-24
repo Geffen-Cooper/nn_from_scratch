@@ -22,6 +22,7 @@ class MSELayer(Layer):
         
         self.Y = Y
         self.Y_hat = Y_hat
+        
         # Note that in general we should apply the MSE to the columns since
         # each sample output is a column vector. However, since the loss is averaged
         # over a batch and the MSE is summed anyways, we can just sum all losses in the matrix
@@ -36,4 +37,4 @@ class MSELayer(Layer):
         pass
 
     def __str__(self):
-        return f'A: shape --> {self.A.shape}\n'
+        return f'Y_hat: shape --> {self.Y_hat.shape}\n'

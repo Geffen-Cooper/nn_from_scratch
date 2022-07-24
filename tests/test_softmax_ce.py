@@ -2,7 +2,6 @@
 
 import sys
 sys.path.append("../") # TODO: find a way to avoid this
-from test_fc import create_layer_variables, create_fc_layer
 from  numpynn.layers.softmax import softmax as sm
 from  numpynn.layers.cross_entropy import cross_entropy as ce
 from  numpynn.layers.fully_connected import fc as fc
@@ -24,14 +23,6 @@ def create_smce_layer(input_dimension):
 
     return torch_smce, numpynn_sm, numpynn_ce
 
-# creates random layer dimension
-def create_random_dimension(dimensions=2):
-    # assume 2D inputs for now, TODO: for conv will be higher dimensionality
-    input_neurons = rng.integers(1,100)
-    batch_size = 2**rng.integers(0,5)
-    print(input_neurons,batch_size)
-    return (input_neurons, batch_size)
-
 
 ''' ================================== TEST FUNCTIONS ================================='''
 
@@ -43,16 +34,16 @@ def create_random_dimension(dimensions=2):
 # test forward prop
 def test_forward():
     # create the layers
-    dim = create_random_dimension()
-    (torch_smce, numpynn_sm, numpynn_ce) = create_smce_layer(dim)
+    (feature_d, batch_size) = create_random_dimension()
+    (torch_smce, numpynn_sm, numpynn_ce) = create_smce_layer((feature_d, batch_size))
 
     # create the input batch
-    (torch_input, numpynn_input) = create_random_batch(dim)
+    (torch_input, numpynn_input) = create_random_batch((feature_d, batch_size))
 
     # create the output labels (classification so column vector)
-    (torch_label, numpynn_label) = create_random_batch((1,dim[1]))
-    torch_label = (torch_label[0]*3).long() 
-    numpynn_label = (numpynn_label*3).astype(int)
+    (torch_label, numpynn_label) = create_random_batch((1,batch_size))
+    torch_label = (torch_label[0]*feature_d).long() # convert [0.0,1.0] floats to [0,C] int labels
+    numpynn_label = (numpynn_label*feature_d).astype(int) 
 
     # compare the forward pass outputs
     # torch expects a (N,) dim label vector and the softmax dim must be specified
@@ -76,7 +67,7 @@ def test_forward():
 # # tested by putting a cesm after a fully connected layer
 def test_backward():
     # get the fc layer variables
-    (input_neurons, output_neurons, batch_size) = create_layer_variables()
+    (input_neurons, output_neurons, batch_size) = create_fc_layer_variables()
 
     # create the fc layer
     (torch_fc,numpynn_fc) = create_fc_layer(input_neurons,output_neurons)
@@ -86,8 +77,8 @@ def test_backward():
 
     # create the output labels (classification so column vector)
     (torch_label, numpynn_label) = create_random_batch((1,batch_size))
-    torch_label = (torch_label[0]*3).long() 
-    numpynn_label = (numpynn_label*3).astype(int)
+    torch_label = (torch_label[0]*output_neurons).long() # convert [0.0,1.0] floats to [0,C] int labels
+    numpynn_label = (numpynn_label*output_neurons).astype(int)
 
     # create the smce layer
     (torch_smce, numpynn_sm, numpynn_ce) = create_smce_layer((output_neurons, batch_size))

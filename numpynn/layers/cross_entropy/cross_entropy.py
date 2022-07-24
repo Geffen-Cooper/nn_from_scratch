@@ -42,4 +42,4 @@ class CrossEntropyLayer(Layer):
         pass
 
     def __str__(self):
-        return f'A: shape --> {self.A.shape}\n'
+        return f'Y_hat: shape --> {self.Y_hat.shape}\n'

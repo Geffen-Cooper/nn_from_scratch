@@ -2,7 +2,6 @@
 
 import sys
 sys.path.append("../") # TODO: find a way to avoid this
-from test_fc import create_layer_variables, create_fc_layer
 from  numpynn.layers.sigmoid import sigmoid as sg
 from  numpynn.layers.fully_connected import fc as fc
 import torch
@@ -22,13 +21,6 @@ def create_sg_layer(input_dimension):
 
     return torch_sg, numpynn_sg
 
-# creates random layer dimension
-def create_random_dimension(dimensions=2):
-    # assume 2D inputs for now, TODO: for conv will be higher dimensionality
-    input_neurons = rng.integers(1,100)
-    batch_size = 2**rng.integers(0,5)
-    return (input_neurons, batch_size)
-
 
 ''' ================================== TEST FUNCTIONS ================================='''
 
@@ -40,11 +32,11 @@ def create_random_dimension(dimensions=2):
 # test forward prop
 def test_forward():
     # create the layers
-    dim = create_random_dimension()
-    (torch_sg,numpynn_sg) = create_sg_layer(dim)
+    (feature_d, batch_size) = create_random_dimension()
+    (torch_sg,numpynn_sg) = create_sg_layer((feature_d, batch_size))
 
     # create the input batch
-    (torch_input, numpynn_input) = create_random_batch(dim)
+    (torch_input, numpynn_input) = create_random_batch((feature_d, batch_size))
 
     # compare the forward pass outputs
     numpynn_out = numpynn_sg.forward(numpynn_input)
@@ -66,7 +58,7 @@ def test_forward():
 # tested by putting a sigmoid after a fully connected layer
 def test_backward():
     # get the fc layer variables
-    (input_neurons, output_neurons, batch_size) = create_layer_variables()
+    (input_neurons, output_neurons, batch_size) = create_fc_layer_variables()
 
     # create the fc layer
     (torch_fc,numpynn_fc) = create_fc_layer(input_neurons,output_neurons)

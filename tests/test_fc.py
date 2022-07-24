@@ -9,30 +9,6 @@ import numpy as np
 from helper_funcs import *
 
 
-# ===================================================================================== #
-# ======================= Helper functions to set up the tests ======================== #
-# ===================================================================================== #
-
-# creates a fully connected layer in torch and numpynn with the same initial parameters
-def create_fc_layer(input_neurons, output_neurons):
-    # let pytorch determine the parameters randomly
-    torch_fc = nn.Linear(input_neurons,output_neurons)
-    numpynn_fc = fc.FullyConnectedLayer(input_neurons,output_neurons,1,rng)
-
-    # copy the values to numpynn
-    numpynn_fc.W = torch_fc.weight.detach().numpy()
-    numpynn_fc.B = torch_fc.bias.detach().numpy().reshape(numpynn_fc.B.shape)
-
-    return torch_fc,numpynn_fc
-
-# creates random layer variables
-def create_layer_variables():
-    input_neurons = rng.integers(1,100)
-    output_neurons = rng.integers(1,10)
-    batch_size = 2**rng.integers(0,5)
-    return input_neurons, output_neurons, batch_size
-
-
 ''' ================================== TEST FUNCTIONS ================================='''
 
 
@@ -42,7 +18,7 @@ def create_layer_variables():
 
 def test_forward():
     # get the layer variables
-    (input_neurons, output_neurons, batch_size) = create_layer_variables()
+    (input_neurons, output_neurons, batch_size) = create_fc_layer_variables()
 
     # create the layers
     (torch_fc,numpynn_fc) = create_fc_layer(input_neurons,output_neurons)
@@ -71,7 +47,7 @@ def test_forward():
 
 def test_backward():
     # get the layer variables
-    (input_neurons, output_neurons, batch_size) = create_layer_variables()
+    (input_neurons, output_neurons, batch_size) = create_fc_layer_variables()
 
     # create the layers
     (torch_fc,numpynn_fc) = create_fc_layer(input_neurons,output_neurons)

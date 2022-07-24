@@ -1,4 +1,4 @@
-''' This file defines the class for fully connected layers'''
+''' This file defines the class for a fully connected layer'''
 
 import numpy as np
 import math
