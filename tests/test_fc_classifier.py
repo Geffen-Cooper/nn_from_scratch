@@ -3,6 +3,7 @@
 import sys
 sys.path.append("../") # TODO: find a way to avoid this
 from numpynn.layers.relu import relu as relu
+from numpynn.layers.tanh import tanh as tanh
 from  numpynn.layers.cross_entropy import cross_entropy as ce
 from numpynn.layers.softmax import softmax as sm
 from  numpynn.layers.fully_connected import fc as fc
@@ -20,14 +21,12 @@ class TorchFCNet(nn.Module):
         # list of layers
         self.layers = nn.ModuleList()
 
-        self.fc1 = nn.Linear(input_neurons,10)
-        self.fc2 = nn.Linear(10,10)
-        self.fc3 = nn.Linear(10,10)
-        self.fc4 = nn.Linear(10,output_neurons)
+        self.fc1 = nn.Linear(input_neurons,20)
+        self.fc2 = nn.Linear(20,20)
+        self.fc3 = nn.Linear(20,output_neurons)
         self.layers.append(self.fc1)
         self.layers.append(self.fc2)
         self.layers.append(self.fc3)
-        self.layers.append(self.fc4)
         self.relu = nn.ReLU()
 
     def forward(self, x):
@@ -36,8 +35,6 @@ class TorchFCNet(nn.Module):
         x = self.fc2(x)
         x = self.relu(x)
         x = self.fc3(x)
-        x = self.relu(x)
-        x = self.fc4(x)
         return x  
 
 # copy the pytorch weights and architecture into the numpy model
@@ -64,13 +61,13 @@ def create_fc_nets(input_neurons, output_neurons):
 
 def train_fc_classifiers(epochs,lr,batch_size):
     # create the models
-    torch_fc_net, numpynn_fc_net = create_fc_nets(2,3)
+    torch_fc_net, numpynn_fc_net = create_fc_nets(2,4)
 
     # create the data
-    X_train,Y_train,X_test,Y_test = gen_clusters(test_split=0.2,num_clusters=3)
+    X_train,Y_train,X_test,Y_test = gen_clusters(test_split=0.2,num_clusters=4)
     num_batches = X_train.shape[0] // batch_size
 
-    X_train = X_train / 2
+    X_train = X_train / 500
 
     # create the loss functions
     torch_smce = nn.CrossEntropyLoss()
@@ -140,4 +137,4 @@ def train_fc_classifiers(epochs,lr,batch_size):
     # # y_wrong = Y_test[torch_preds != Y_test]
     show_clusters(X_train,Y_train,X_test,Y_test,torch_fc_net)
 
-train_fc_classifiers(20,0.0001,32)
+train_fc_classifiers(40,0.1,64)

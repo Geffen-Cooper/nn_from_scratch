@@ -20,8 +20,8 @@ def show_clusters(X_train,Y_train,X_test=None,Y_test=None,model=None,x_wrong=Non
 
     if model != None:
         from torch.autograd import Variable
-        x_span = np.linspace(-100,600,1000)
-        y_span = np.linspace(-100,600,1000)
+        x_span = np.linspace(-100,600,1000)/500
+        y_span = np.linspace(-100,600,1000)/500
         xx, yy = np.meshgrid(x_span, y_span)
         preds = model(Variable(torch.from_numpy(np.c_[xx.ravel(), yy.ravel()]).float()))
         pred_labels = np.argmax(preds.detach().numpy(),axis=1)
